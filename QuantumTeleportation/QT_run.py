@@ -13,6 +13,7 @@ from netsquid.components.models.qerrormodels import FibreLossModel
 from netsquid.components.models.delaymodels import FibreDelayModel
 from netsquid.components.instructions import  INSTR_X,INSTR_Z,INSTR_CNOT,INSTR_H,INSTR_MEASURE
 from netsquid.qubits.qubitapi import create_qubits,operate
+from netsquid.qubits import measure , reduced_dm
 
 
 from random import randint
@@ -67,10 +68,15 @@ def run_Teleport_sim(runtimes=1,fibre_len=10**-9,memNoiseMmodel=None,processorNo
         # test example
         # make an EPR pair and origin state
         oriQubit,epr1,epr2=create_qubits(3)
-        operate(oriQubit, X) # init qubit
+        # print(measure(oriQubit) , measure(epr1) , measure(epr2))
+
+        operate(oriQubit, H) # init qubit
+
+
         operate(epr1, H)
         operate([epr1, epr2], CNOT)
-        
+        print(measure(oriQubit) , measure(epr1) , measure(epr2))
+        print(measure(oriQubit) , measure(epr1) , measure(epr2))
         # make oriQubit
         #operate(oriQubit, X)
         

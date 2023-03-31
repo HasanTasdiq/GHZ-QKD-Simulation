@@ -18,6 +18,7 @@ from netsquid.components.qsource import SourceStatus
 
 from netsquid.components.models.qerrormodels import FibreLossModel
 from netsquid.components.models.delaymodels import FibreDelayModel
+from netsquid.qubits import measure , reduced_dm
 
 from QT_sender import *
 from QT_receiver import *
@@ -72,6 +73,8 @@ def run_Teleport_sim(runtimes=1,fibre_len=10**-9,memNoiseMmodel=None,processorNo
         operate(oriQubit, X) # init qubit
         operate(epr1, H)
         operate([epr1, epr2], CNOT)
+
+
         
         # make oriQubit
         #operate(oriQubit, X)

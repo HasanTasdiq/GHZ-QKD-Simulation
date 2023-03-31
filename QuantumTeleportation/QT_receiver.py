@@ -5,6 +5,7 @@ from netsquid.components.qprogram import QuantumProgram
 from netsquid.qubits.qstate import QState
 from netsquid.qubits import set_qstate_formalism, QFormalism
 from netsquid.components.instructions import INSTR_X,INSTR_Z
+from netsquid.qubits import measure , reduced_dm
 
 
 import sys
@@ -84,6 +85,8 @@ class QuantumTeleportationReceiver(NodeProtocol):
         yield self.await_program(processor=self.processor)
 
         self.receivedQubit=self.processor.peek(0)[0]
+        print(measure(self.receivedQubit))
+
 
 
 

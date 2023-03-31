@@ -2,9 +2,10 @@
 from netsquid.components.qprogram import QuantumProgram
 from netsquid.protocols import NodeProtocol
 from netsquid.components.instructions import INSTR_CNOT,INSTR_H,INSTR_MEASURE
+from netsquid.qubits import measure , reduced_dm
 
 import sys
-scriptpath = "lib/"
+scriptpath = "../lib/"
 sys.path.append(scriptpath)
 from functions import ProgramFail
 
@@ -46,6 +47,8 @@ class QuantumTeleportationSender(NodeProtocol):
     def run(self):
         
         # Entangle the two qubits and measure
+        print('send 1 ', measure(self.SendQubit))
+        print('send 2 ' , measure(self.SendQubit))
         myTP_SenderTeleport=TP_SenderTeleport()
         self.processor.execute_program(myTP_SenderTeleport,qubit_mapping=[0,1])
         self.processor.set_program_fail_callback(ProgramFail,info=self.processor.name,once=True)
