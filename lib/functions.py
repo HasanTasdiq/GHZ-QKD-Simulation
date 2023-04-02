@@ -6,8 +6,10 @@ from netsquid.qubits.operators import Operator,create_rotation_op
 from netsquid.components.instructions import *
 from netsquid.components.qprogram import *
 from netsquid.components.qprocessor import *
-from netsquid.qubits.qubitapi import assign_qstate
+from netsquid.qubits.qubitapi import assign_qstate,create_qubits,operate , measure, gmeasure, reduced_dm
 from random import randint
+from netsquid.qubits.operators import X,H,CNOT , Z
+import cmath
 
 '''
 import logging
@@ -333,6 +335,45 @@ def AssignStatesBydm(qList,dmList):
         assign_qstate(qList[i], dmList[i], formalism=ns.qubits.QFormalism.DM) #ns.qubits.QFormalism.DM
 
     return qList
+
+def MeasureByProb(qubit):
+
+    dm = reduced_dm(qubit)
+    # print(dm)
+    # alpha = complex(dm[0][0]).real()
+    alpha = complex(str(dm[0][0]).replace(')' , '').replace('(' , ''))
+    beta = complex(str(dm[1][1]).replace(')' , '').replace('(' , ''))
+    print(alpha.real , beta.real)
+    if alpha.real > beta.real:
+        return 0
+    return 1
+
+
+    # out_map = {}
+    # out_map[0] = 0
+    # out_map[1] = 0
+    # aqbits = create_qubits(shots)
+    # P_0, P_1 = Z.projectors
+
+    # # print(reduced_dm(qubit))
+    # # print(reduced_dm(qubit))
+
+
+    # for i in range(shots):
+    #     aq = aqbits[i]
+    #     operate([qubit, aq], CNOT)
+
+    # for i in range(shots):
+    #     aq = aqbits[i]
+    #     print(reduced_dm(aq))
+
+    #     # ms = gmeasure(aq, [P_0, P_1])
+    #     # print('ms: ' , ms)
+    #     # out = ms[0]
+    #     # out_map[out] = out_map[out] + 1 
+    
+    # return out_map
+
 
 
 

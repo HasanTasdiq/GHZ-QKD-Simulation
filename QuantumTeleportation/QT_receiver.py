@@ -11,7 +11,7 @@ from netsquid.qubits import measure , reduced_dm
 import sys
 scriptpath = "../lib/"
 sys.path.append(scriptpath)
-from functions import ProgramFail
+from functions import ProgramFail , MeasureByProb
 
 
 class TP_ReceiverAdjust(QuantumProgram):
@@ -85,7 +85,8 @@ class QuantumTeleportationReceiver(NodeProtocol):
         yield self.await_program(processor=self.processor)
 
         self.receivedQubit=self.processor.peek(0)[0]
-        print(measure(self.receivedQubit))
+        # print(measure(self.receivedQubit))
+        print(MeasureByProb(self.receivedQubit))
 
 
 
