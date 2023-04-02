@@ -4,7 +4,7 @@ from netsquid.components.qprogram import QuantumProgram
 #from netsquid.qubits.qformalism import *
 from netsquid.qubits.qstate import QState
 from netsquid.qubits import set_qstate_formalism, QFormalism
-from netsquid.components.instructions import INSTR_X,INSTR_Z
+from netsquid.components.instructions import INSTR_X,INSTR_Z,INSTR_H
 from netsquid.qubits import measure , reduced_dm
 
 
@@ -38,10 +38,11 @@ class TP_ReceiverAdjust(QuantumProgram):
             if self.adjBase[1]==0:
                 self.apply(INSTR_X, 0)
 
-
         else:
             print("R undefined case in TP_ReceiverAdjust")
-                
+        
+        # self.apply(INSTR_H , 0)                
+        
         yield self.run(parallel=False)
         
 
@@ -85,6 +86,7 @@ class QuantumTeleportationReceiver(NodeProtocol):
         yield self.await_program(processor=self.processor)
 
         self.receivedQubit=self.processor.peek(0)[0]
+
         # print(measure(self.receivedQubit))
         print(MeasureByProb(self.receivedQubit))
 

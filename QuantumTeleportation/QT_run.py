@@ -71,7 +71,7 @@ def run_Teleport_sim(runtimes=1,fibre_len=10**-9,memNoiseMmodel=None,processorNo
         
         # test example
         # make an EPR pair and origin state
-        oriQubit,epr1,epr2=create_qubits(3)
+        oriQubit, oriQubit2,epr1,epr2=create_qubits(4)
         # epr1,epr2=create_qubits(2)
         # print(measure(oriQubit) , measure(epr1) , measure(epr2))
 
@@ -92,6 +92,9 @@ def run_Teleport_sim(runtimes=1,fibre_len=10**-9,memNoiseMmodel=None,processorNo
 
         operate(epr1, H)
         operate([epr1, epr2], CNOT)
+
+
+    
         # print(measure(oriQubit) , measure(epr1) , measure(epr2))
         # print(measure(oriQubit) , measure(epr1) , measure(epr2))
         # make oriQubit
@@ -99,7 +102,7 @@ def run_Teleport_sim(runtimes=1,fibre_len=10**-9,memNoiseMmodel=None,processorNo
         
         
         myQT_Sender = QuantumTeleportationSender(node=nodeSender,
-            processor=processorSender,SendQubit=oriQubit,EPR_1=epr1,portNames=["portC_Sender"])
+            processor=processorSender,SendQubit=oriQubit ,EPR_1=epr1,portNames=["portC_Sender"])
         myQT_Receiver = QuantumTeleportationReceiver(node=nodeReceiver,
             processor=processorReceiver,EPR_2=epr2,portNames=["portC_Receiver"],bellState=1)
         
