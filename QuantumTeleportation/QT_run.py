@@ -18,7 +18,7 @@ from netsquid.qubits import measure , reduced_dm,assign_qstate,set_qstate_formal
 
 from random import randint
 
-from QT_sender import QuantumTeleportationSender
+from QT_sender import QuantumTeleportationSender,key_len
 from QT_receiver import QuantumTeleportationReceiver
 
 import sys
@@ -69,9 +69,10 @@ def run_Teleport_sim(runtimes=1,fibre_len=10**-9,memNoiseMmodel=None,processorNo
                             local_port_name="portC_Sender", remote_port_name="portC_Receiver")
 
         
+        n_qubits = key_len
         # test example
         # make an EPR pair and origin state
-        oriQubit, oriQubit2,epr1,epr2=create_qubits(4)
+        qubits=create_qubits(n_qubits + 1)
         # epr1,epr2=create_qubits(2)
         # print(measure(oriQubit) , measure(epr1) , measure(epr2))
 
@@ -81,17 +82,18 @@ def run_Teleport_sim(runtimes=1,fibre_len=10**-9,memNoiseMmodel=None,processorNo
         # oriQubit , or2=create_qubits(2 , no_state=True)
 
 
-        oriQubit = AssignStatesBydm([oriQubit] , [np.array([[.4,0.88],[0.88,0.6]])])[0]
+        # oriQubit = AssignStatesBydm([oriQubit] , [np.array([[.4,0.88],[0.88,0.6]])])[0]
         # operate(oriQubit, H) # init qubit
         # operate(oriQubit, H) # init qubit
-        print('from main' , MeasureByProb(oriQubit))
+        # print('from main' , MeasureByProb(oriQubit))
         # print(MeasureByProb(epr1))
         # print(MeasureByProb(epr2))
         # print(measure(oriQubit))
 
 
-        operate(epr1, H)
-        operate([epr1, epr2], CNOT)
+        # operate(epr0, H)
+        # operate([epr0, epr1], CNOT)
+        # operate([epr1, epr2], CNOT)
 
 
     
@@ -99,12 +101,21 @@ def run_Teleport_sim(runtimes=1,fibre_len=10**-9,memNoiseMmodel=None,processorNo
         # print(measure(oriQubit) , measure(epr1) , measure(epr2))
         # make oriQubit
         #operate(oriQubit, X)
+
+
+        operate(qubits[0] , H)
+
+        for i in range(0 , n_qubits ):
+            operate([qubits[i] , qubits[i+1]] , CNOT)
+        
+        receivers_qbit = qubits.pop()
+        
         
         
         myQT_Sender = QuantumTeleportationSender(node=nodeSender,
-            processor=processorSender,SendQubit=oriQubit ,EPR_1=epr1,portNames=["portC_Sender"])
+            processor=processorSender,qubits=qubits,portNames=["portC_Sender"])
         myQT_Receiver = QuantumTeleportationReceiver(node=nodeReceiver,
-            processor=processorReceiver,EPR_2=epr2,portNames=["portC_Receiver"],bellState=1)
+            processor=processorReceiver,EPR_2=receivers_qbit,portNames=["portC_Receiver"],bellState=1)
         
         myQT_Receiver.start()
         myQT_Sender.start()
