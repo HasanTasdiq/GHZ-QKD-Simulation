@@ -102,13 +102,27 @@ def run_Teleport_sim(runtimes=1,fibre_len=10**-9,memNoiseMmodel=None,processorNo
         # make oriQubit
         #operate(oriQubit, X)
 
+        # print(MeasureByProb(qubits[0]))
 
         operate(qubits[0] , H)
 
         for i in range(0 , n_qubits ):
             operate([qubits[i] , qubits[i+1]] , CNOT)
+
+
+        # tq1 = qubits.pop()
+        # tq2 = qubits.pop()
+        # operate([tq1 , tq2] , CNOT)
+        # operate(tq1 , H)
+        # print(measure(tq1))
+        # print(measure(tq2))
         
         receivers_qbit = qubits.pop()
+
+        # operate([qubits[0] , receivers_qbit], CNOT)
+        # operate(qubits[0] , H)
+        # print(measure(qubits[0]) )
+
         
         
         

@@ -67,13 +67,17 @@ class QuantumTeleportationSender(NodeProtocol):
 
         self.cqubits = create_qubits(key_len)
 
+
+
         self.processor.put(self.cqubits + self.qubits)
+        # self.processor.put(self.qubits + self.cqubits)
 
         self.key = [randint(0,1) for i in range(key_len)]
         print('------key------ ' , self.key)
 
         for i in range(key_len):
-            self.qubits[i] = AssignStatesBydm([self.qubits[i]] , [np.array([[1 - self.key[i],0.88],[0.88,self.key[i]]])])[0]
+            self.cqubits[i] = AssignStatesBydm([self.cqubits[i]] , [np.array([[1 - self.key[i],0.5],[0.5,self.key[i]]])])[0]
+            # self.cqubits[i] = AssignStatesBydm([self.cqubits[i]] , [np.array([[.4,0.5],[0.5,.6]])])[0]
         
         
         

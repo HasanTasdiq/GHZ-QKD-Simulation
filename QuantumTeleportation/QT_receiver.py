@@ -127,7 +127,7 @@ class QuantumTeleportationReceiver(NodeProtocol):
             port=self.node.ports[self.portNameCR1]
             yield self.await_port_input(port)
             res=port.rx_input().items
-            print("R get results:", res)
+            # print("R get results:", res)
             
 
             # wait for delay ns
@@ -146,7 +146,7 @@ class QuantumTeleportationReceiver(NodeProtocol):
 
             # print(measure(self.receivedQubit))
             # print(MeasureByProb(self.receivedQubit))
-            key.append(MeasureByProb(self.receivedQubit))
+            key.append(MeasureByProb(self.receivedQubit , do_print=True))
 
 
 

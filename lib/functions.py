@@ -336,14 +336,15 @@ def AssignStatesBydm(qList,dmList):
 
     return qList
 
-def MeasureByProb(qubit):
+def MeasureByProb(qubit , do_print = False):
 
     dm = reduced_dm(qubit)
     # print(dm)
     # alpha = complex(dm[0][0]).real()
     alpha = complex(str(dm[0][0]).replace(')' , '').replace('(' , ''))
     beta = complex(str(dm[1][1]).replace(')' , '').replace('(' , ''))
-    print(alpha.real , beta.real)
+    if do_print:
+        print(alpha.real , beta.real)
     if alpha.real > beta.real:
         return 0
     return 1
