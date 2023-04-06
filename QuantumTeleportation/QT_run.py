@@ -2,7 +2,7 @@ import numpy as np
 import netsquid as ns
 from netsquid.nodes.node import Node
 from netsquid.protocols import NodeProtocol
-from netsquid.qubits.operators import X,H,CNOT
+from netsquid.qubits.operators import X,H,CNOT , Z
 from netsquid.components.qprocessor import QuantumProcessor,PhysicalInstruction
 
 from netsquid.components.qchannel import QuantumChannel
@@ -41,7 +41,7 @@ def run_Teleport_sim(runtimes=1,fibre_len=10**-9,memNoiseMmodel=None,processorNo
         nodeReceiver = Node("ReceiverNode"  , port_names=["portC_Receiver"])
 
         # processors===============================================================
-        processorSender=QuantumProcessor("processorSender", num_positions=10,
+        processorSender=QuantumProcessor("processorSender", num_positions=100,
             mem_noise_models=memNoiseMmodel, phys_instructions=[
             PhysicalInstruction(INSTR_X, duration=1, quantum_noise_model=processorNoiseModel),
             PhysicalInstruction(INSTR_Z, duration=1, quantum_noise_model=processorNoiseModel),
@@ -118,6 +118,25 @@ def run_Teleport_sim(runtimes=1,fibre_len=10**-9,memNoiseMmodel=None,processorNo
         # print(measure(tq2))
         
         receivers_qbit = qubits.pop()
+
+
+        # tq1 , tq2=create_qubits(2)
+
+        # operate(tq1 , H)
+        # operate([tq1 , tq2] , CNOT)
+
+        # operate([receivers_qbit , tq1] , CNOT)
+        # operate(receivers_qbit , H)
+
+        # z = measure(receivers_qbit)[0]
+        # x = measure(tq1)[0]
+
+        # if z == 1:
+        #     operate(tq2 , Z)
+        # if x == 1:
+        #     operate(tq2 , X)
+
+        # print('zzz ' , z)
 
         # operate([qubits[0] , receivers_qbit], CNOT)
         # operate(qubits[0] , H)

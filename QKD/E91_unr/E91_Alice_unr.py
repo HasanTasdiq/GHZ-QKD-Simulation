@@ -186,18 +186,4 @@ class AliceProtocol(NodeProtocol):
         self.node.ports[self.portNameQ1].tx_output(payload)
 
 
-    # def A_sendEPR(self):
-    #     #print("A_sendEPR")
-    #     inx1=list(range(0,2*self.num_bits,2))
-    #     payload1=self.processor.pop(inx1)
-
-
-    #     inx=list(range(1,2*self.num_bits+1,2))
-    #     payload=self.processor.pop(inx)
-
-
-    #     for i in range(self.num_bits):
-    #         print(measure(payload1[i]) , measure(payload[i]))
-
-    #     self.node.ports[self.portNameQ1].tx_output(payload)
         
