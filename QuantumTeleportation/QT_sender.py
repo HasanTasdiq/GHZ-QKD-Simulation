@@ -6,6 +6,7 @@ from netsquid.qubits import measure , reduced_dm, create_qubits,operate
 import numpy as np
 from netsquid.qubits.operators import X,H,CNOT
 from random import randint
+import time
 
 import sys
 scriptpath = "../lib/"
@@ -24,7 +25,7 @@ class TP_SenderTeleport(QuantumProgram):
     def program(self):
         # self.apply(INSTR_MEASURE,qubit_indices=0, output_key='2',physical=True) # measure the origin state
         # self.apply(INSTR_MEASURE,qubit_indices=0, output_key='2',physical=True) # measure the epr1
-        self.apply(INSTR_MEASURE_BELL,qubit_indices=[self.idx,self.idx + key_len], output_key='2',physical=True) # measure the epr1
+        self.apply(INSTR_MEASURE_BELL,qubit_indices=[self.idx,self.idx + key_len], output_key='2',physical=True) # measure BSm
         # self.apply(INSTR_MEASURE_BELL,qubit_indices=[3,2], output_key='3',physical=True) # measure the epr1
         
         # self.apply(INSTR_H, 0) 
@@ -84,6 +85,8 @@ class QuantumTeleportationSender(NodeProtocol):
     def run(self):
 
         for i in range(key_len):
+            start = time.time()
+
         
             myTP_SenderTeleport=TP_SenderTeleport(i)
             self.processor.execute_program(myTP_SenderTeleport,qubit_mapping=list(range(2*key_len)))
@@ -93,6 +96,10 @@ class QuantumTeleportationSender(NodeProtocol):
             self.measureRes = [0,0]
 
             output2 = myTP_SenderTeleport.output['2'][0]
+            end = time.time()
+
+            print('time for processing iteration ' , i , end - start , ' sec')
+
             # print('out2 ' , output2)
             # operate(oriQubit, H) # init qubit
 
