@@ -375,6 +375,10 @@ def MeasureByProb(qubit , do_print = False):
     
     # return out_map
 
+def get_fidelity(qbit):
+    fid = ns.qubits.fidelity(
+            qbit, ns.qubits.outerprod((ns.S*ns.H*ns.s0).arr), squared=True)
+    return fid
 
 
 

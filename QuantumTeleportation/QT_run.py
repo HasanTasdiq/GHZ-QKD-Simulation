@@ -24,7 +24,7 @@ from QT_receiver import QuantumTeleportationReceiver
 import sys
 scriptpath = "../lib/"
 sys.path.append(scriptpath)
-from functions import AssignStatesBydm , MeasureByProb
+from functions import AssignStatesBydm , MeasureByProb,get_fidelity
 
 def run_Teleport_sim(runtimes=1,fibre_len=10**-9,memNoiseMmodel=None,processorNoiseModel=None,delay=0
                ,loss_init=0,loss_len=0,QChV=3*10**-4,CChV=3*10**-4):
@@ -41,7 +41,7 @@ def run_Teleport_sim(runtimes=1,fibre_len=10**-9,memNoiseMmodel=None,processorNo
         nodeReceiver = Node("ReceiverNode"  , port_names=["portC_Receiver"])
 
         # processors===============================================================
-        processorSender=QuantumProcessor("processorSender", num_positions=100,
+        processorSender=QuantumProcessor("processorSender", num_positions=200,
             mem_noise_models=memNoiseMmodel, phys_instructions=[
             PhysicalInstruction(INSTR_X, duration=1, quantum_noise_model=processorNoiseModel),
             PhysicalInstruction(INSTR_Z, duration=1, quantum_noise_model=processorNoiseModel),
@@ -142,7 +142,7 @@ def run_Teleport_sim(runtimes=1,fibre_len=10**-9,memNoiseMmodel=None,processorNo
         # operate(qubits[0] , H)
         # print(measure(qubits[0]) )
 
-        
+        # print('fidelity of bob qbit' , get_fidelity(receivers_qbit) )
         
         
         myQT_Sender = QuantumTeleportationSender(node=nodeSender,
