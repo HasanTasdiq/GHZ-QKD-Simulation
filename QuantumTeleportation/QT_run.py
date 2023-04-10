@@ -106,8 +106,11 @@ def run_Teleport_sim(runtimes=1,fibre_len=10**-9,memNoiseMmodel=None,processorNo
 
         operate(qubits[0] , H)
 
-        for i in range(0 , n_qubits ):
-            operate([qubits[i] , qubits[i+1]] , CNOT)
+        # for i in range(0 , n_qubits ):
+        #     operate([qubits[i] , qubits[i+1]] , CNOT)
+
+        for i in range(1 , n_qubits + 1 ):
+            operate([qubits[0] , qubits[i]] , CNOT)
 
 
         # tq1 = qubits.pop()

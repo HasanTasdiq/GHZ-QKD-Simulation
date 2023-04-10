@@ -14,7 +14,7 @@ sys.path.append(scriptpath)
 from functions import ProgramFail , MeasureByProb, AssignStatesBydm
 
 
-key_len = 30
+key_len = 10
 
 class TP_SenderTeleport(QuantumProgram):
     
