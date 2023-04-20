@@ -14,7 +14,7 @@ sys.path.append(scriptpath)
 from functions import ProgramFail , MeasureByProb, AssignStatesBydm
 
 
-key_len = 10
+key_len = 5
 
 class TP_SenderTeleport(QuantumProgram):
     
@@ -43,13 +43,17 @@ class TP_SenderTeleport(QuantumProgram):
 
 class QuantumTeleportationSender(NodeProtocol):
     
-    def __init__(self,node,processor,qubits,portNames=["portC_Sender"]): 
+    def __init__(self,node,processor,portNames=["portC_Sender"]): 
         super().__init__()
         self.node=node
         self.processor=processor
-        self.qubits=qubits
+        self.qubits=self.gen_qubits()
         self.measureRes=None
+        self.portNameQS1='portQ_Sender'
+        self.portNameQS2='portQ_Sender2'
+
         self.portNameCS1=portNames[0]
+        self.portNameCS2=portNames[1]
 
         self.cqubits = create_qubits(key_len)
 
@@ -68,8 +72,15 @@ class QuantumTeleportationSender(NodeProtocol):
         
         
     def run(self):
+        self.send_qbit()
+
 
         for i in range(key_len):
+            # print('----------- remaining qbits ------------ i: ' , i)
+            # for qbit in self.qubits:
+            #     MeasureByProb(qbit , do_print=True)
+            # print('------------------------------------')
+
             start = time.time()
 
         
@@ -99,8 +110,31 @@ class QuantumTeleportationSender(NodeProtocol):
             print('sends res ' , self.measureRes)
             self.node.ports[self.portNameCS1].tx_output(self.measureRes)
 
+            # self.node.ports[self.portNameCS2].tx_output(self.measureRes)
+
+
             # print('from sender EPR0' , MeasureByProb(self.cqubits[i]))
             # print('from sender epr1' , MeasureByProb(self.EPR_1))
+    
+    def gen_qubits(self):
+        qubits=create_qubits(key_len + 1)
+        operate(qubits[0] , H)
+
+        # for i in range(0 , n_qubits ):
+        #     operate([qubits[i] , qubits[i+1]] , CNOT)
+
+        for i in range(1 , key_len + 1 ):
+            operate([qubits[0] , qubits[i]] , CNOT)
+        
+        return qubits
+    
+    def send_qbit(self):
+        qubit = self.processor.pop(2* key_len )
+        self.node.ports[self.portNameQS1].tx_output(qubit)
+
+        # qubit = self.processor.pop(2* key_len )
+        # self.node.ports[self.portNameQS2].tx_output(qubit)
+
 
 
 

@@ -84,6 +84,9 @@ def run_Teleport_sim(runtimes=1,fibre_len=10**-9,memNoiseMmodel=None,processorNo
             processor=processorSender,SendQubit=oriQubit,EPR_1=epr1,portNames=["portC_Sender"])
         myQT_Receiver = QuantumTeleportationReceiver(node=nodeReceiver,
             processor=processorReceiver,EPR_2=epr2,portNames=["portC_Receiver"],bellState=1)
+
+        myQT_Receiver = QuantumTeleportationReceiver(node=nodeReceiver,
+            processor=processorReceiver,EPR_2=epr2,portNames=["portC_Receiver"],bellState=1)
         
         myQT_Receiver.start()
         myQT_Sender.start()

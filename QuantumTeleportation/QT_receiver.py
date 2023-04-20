@@ -105,16 +105,18 @@ class TP_ReceiverReset(QuantumProgram):
         
 class QuantumTeleportationReceiver(NodeProtocol):
     
-    def __init__(self,node,processor,EPR_2,portNames=["portC_Receiver"],bellState=1,delay=0): 
+    def __init__(self,node,processor,portNames=["portC_Receiver"],bellState=1,delay=0): 
         super().__init__()
         self.node=node
         self.processor=processor
         self.bellState=bellState
 
-        self.resultQubit=EPR_2
+
         self.portNameCR1=portNames[0]
+        self.portNameQR1=portNames[1]
+
         self.receivedQubit=None
-        self.processor.put(self.resultQubit)
+        # self.processor.put(self.resultQubit)
         self.delay=delay
 
         set_qstate_formalism(QFormalism.DM)
@@ -122,8 +124,15 @@ class QuantumTeleportationReceiver(NodeProtocol):
     def run(self):
 
         key = []
+        port = self.node.ports[self.portNameQR1]
+
+        
+        yield self.await_port_input(port)
+        received_qubit = port.rx_input().items
+        self.processor.put(received_qubit)
 
         for i in range(key_len):
+            # print('waiting ' , self.node.name)
         
             port=self.node.ports[self.portNameCR1]
             yield self.await_port_input(port)
@@ -147,8 +156,9 @@ class QuantumTeleportationReceiver(NodeProtocol):
 
             # print(measure(self.receivedQubit))
             # print(MeasureByProb(self.receivedQubit))
-            key.append(MeasureByProb(self.receivedQubit , do_print=True))
-
+            # print('-----------received qbit------------')
+            key.append(MeasureByProb(self.receivedQubit , do_print=False))
+            # print('------------------------------------')
 
 
             myTP_ReceiverReset=TP_ReceiverReset(self.bellState,res)
@@ -162,7 +172,7 @@ class QuantumTeleportationReceiver(NodeProtocol):
 
             # print('fidelity of received qbit' , fid)
 
-        print('received key: '  , key)
+        print('received key at : ' , self.node.name  , key)
 
 
     def show_state(self):
