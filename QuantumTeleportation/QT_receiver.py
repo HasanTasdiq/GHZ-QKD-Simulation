@@ -12,7 +12,7 @@ import netsquid as ns
 import sys
 scriptpath = "../lib/"
 sys.path.append(scriptpath)
-from functions import ProgramFail , MeasureByProb
+from functions import ProgramFail , MeasureByProb,MeasureProb
 
 from QT_sender import key_len
 
@@ -130,6 +130,10 @@ class QuantumTeleportationReceiver(NodeProtocol):
         yield self.await_port_input(port)
         received_qubit = port.rx_input().items
         self.processor.put(received_qubit)
+        self.prevRes = []
+
+        self.prevAlpha = 1
+        self.prevBeta = 1
 
         for i in range(key_len):
             # print('waiting ' , self.node.name)
@@ -158,6 +162,7 @@ class QuantumTeleportationReceiver(NodeProtocol):
             # print(MeasureByProb(self.receivedQubit))
             # print('-----------received qbit------------')
             key.append(MeasureByProb(self.receivedQubit , do_print=False))
+            # key.append(self.extractRes(self.receivedQubit , res))
             # print('------------------------------------')
 
 
@@ -170,6 +175,8 @@ class QuantumTeleportationReceiver(NodeProtocol):
             fid = fidelity(
             self.receivedQubit, ns.qubits.outerprod((ns.S*ns.H*ns.s0).arr), squared=True)
 
+            self.prevRes = res
+
             # print('fidelity of received qbit' , fid)
 
         print('received key at : ' , self.node.name  , key)
@@ -179,3 +186,50 @@ class QuantumTeleportationReceiver(NodeProtocol):
         set_qstate_formalism(QFormalism.DM)
         tmp=self.processor.pop(0)[0]
         print("R final state:",tmp.qstate.dm)
+    
+    def extractRes(self , qubit , res):
+        # print('#########')
+        # print('#######', self.prevAlpha , self.prevBeta)
+        
+        prob_0 , prob_1 = MeasureProb(qubit)
+        alpha = prob_0 
+        beta = prob_1
+        z = 0
+        if len(self.prevRes) > 0 and  self.prevRes[0] == 1:
+            z = 1
+        if len(self.prevRes) > 0 and self.prevRes[0]:
+            if res[1] == 0:
+                alpha = prob_0/self.prevAlpha
+                beta = prob_1 / self.prevBeta
+            elif res[1] == 1:
+                alpha = prob_0/self.prevBeta
+                beta = prob_1 / self.prevAlpha
+        
+        if len(self.prevRes) > 0 and self.prevRes[1]:
+            if res[1] == 0:
+                alpha = prob_0/self.prevBeta
+                beta = prob_1 / self.prevAlpha
+            elif res[1] == 1:
+                alpha = prob_0/self.prevAlpha
+                beta = prob_1 / self.prevBeta
+        
+        
+        if len(self.prevRes) > 0 and self.prevRes[0] == 1 and self.prevRes[1] == 0   and res[1] == 1:
+            alpha = -alpha
+
+        if len(self.prevRes) > 0 and self.prevRes[0] == 1 and self.prevRes[1] == 1:
+            if res[1] == 0:
+                alpha = -alpha
+            elif res[1] == 1:
+                beta = -beta    
+
+
+        self.prevAlpha = alpha
+        self.prevBeta = beta
+
+        mes = 1
+        
+        if alpha > beta:
+            mes = 0
+
+        return mes

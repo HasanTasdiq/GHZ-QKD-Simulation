@@ -14,7 +14,7 @@ sys.path.append(scriptpath)
 from functions import ProgramFail , MeasureByProb, AssignStatesBydm
 
 
-key_len = 5
+key_len = 6
 
 class TP_SenderTeleport(QuantumProgram):
     
@@ -23,17 +23,23 @@ class TP_SenderTeleport(QuantumProgram):
         self.idx = idx
         
     def program(self):
-    #    self.apply(INSTR_MEASURE_BELL,qubit_indices=[0,1], output_key='2',physical=True) # measure BSm
+        # self.apply(INSTR_MEASURE_BELL,qubit_indices=[0,1], output_key='2',physical=True) # measure BSm
 
 
 
-        # EPR-like        
-        self.apply(INSTR_CNOT, [0, 1])
-        self.apply(INSTR_H, 0) 
-        
-        self.apply(INSTR_MEASURE,qubit_indices=0, output_key='0',physical=True) # measure the origin state
-        self.apply(INSTR_MEASURE,qubit_indices=1, output_key='1',physical=True) # measure the epr1
-        
+        # EPR-like       
+         
+        if self.idx %2 == 0:
+            self.apply(INSTR_CNOT, [0, 1])
+            self.apply(INSTR_H, 0) 
+            
+            self.apply(INSTR_MEASURE,qubit_indices=0, output_key='0',physical=True) # measure the origin state
+            self.apply(INSTR_MEASURE,qubit_indices=1, output_key='1',physical=True) # measure the epr1
+        else:
+            self.apply(INSTR_CNOT, [0, 1])
+            self.apply(INSTR_MEASURE,qubit_indices=1, output_key='2',physical=True) # measure the origin state
+
+
 
         yield self.run(parallel=False)
 
@@ -62,12 +68,38 @@ class QuantumTeleportationSender(NodeProtocol):
         self.processor.put(self.cqubits + self.qubits)
         # self.processor.put(self.qubits + self.cqubits)
 
-        self.key = [randint(0,1) for i in range(key_len)]
+        # self.key = [randint(0,1) for i in range(key_len)]
+        self.key = [1,0,1,0,1 , 0]
         print('------key------ ' , self.key)
 
+        
+        p = .5
+        q = .5
         for i in range(key_len):
-            self.cqubits[i] = AssignStatesBydm([self.cqubits[i]] , [np.array([[1 - self.key[i],1],[1,self.key[i]]])])[0]
-            # self.cqubits[i] = AssignStatesBydm([self.cqubits[i]] , [np.array([[.4,0.5],[0.5,.6]])])[0]
+            a = .9
+            b = .1
+            if self.key[i] == 1:
+                a = .1
+                b = .9
+
+            self.cqubits[i] = AssignStatesBydm([self.cqubits[i]] , [np.array([[a,1],[1,b]])])[0]
+
+            # if i % 2 == 1:
+            #     operate(self.cqubits[i] , H)
+            #     # self.cqubits[i] = AssignStatesBydm([self.cqubits[i]] , [np.array([[p,1],[1,q]])])[0]
+
+            # p = a
+            # q = b
+
+            # if i %2 == 0:
+            #     # operate(self.cqubits[i] , H)
+
+            #     self.cqubits[i] = AssignStatesBydm([self.cqubits[i]] , [np.array([[1 - self.key[i],1],[1,self.key[i]]])])[0]
+            # else:
+            #     # operate(self.cqubits[i] , H)
+            #     # self.cqubits[i] = AssignStatesBydm([self.cqubits[i]] , [np.array([[1 - self.key[i],1],[1,self.key[i]]])])[0]
+
+            #     self.cqubits[i] = AssignStatesBydm([self.cqubits[i]] , [np.array([[.4,0.5],[0.5,.6]])])[0]
         
         
         
@@ -76,10 +108,7 @@ class QuantumTeleportationSender(NodeProtocol):
 
 
         for i in range(key_len):
-            # print('----------- remaining qbits ------------ i: ' , i)
-            # for qbit in self.qubits:
-            #     MeasureByProb(qbit , do_print=True)
-            # print('------------------------------------')
+
 
             start = time.time()
 
@@ -90,25 +119,32 @@ class QuantumTeleportationSender(NodeProtocol):
             self.processor.set_program_fail_callback(ProgramFail,info=self.processor.name,once=True)
             
             yield self.await_program(processor=self.processor)
-            self.measureRes = [myTP_SenderTeleport.output['0'][0] , myTP_SenderTeleport.output['1'][0]]
-            # self.measureRes = [0,0]
 
-            # output2 = myTP_SenderTeleport.output['2'][0]
-            # end = time.time()
 
-            # print('time for processing iteration ' , i , end - start , ' sec')
+            if i %2 ==0:
+                self.measureRes = [myTP_SenderTeleport.output['0'][0] , myTP_SenderTeleport.output['1'][0]]
+                # self.measureRes = [0,0]
 
-            # # print('out2 ' , output2)
-            # # operate(oriQubit, H) # init qubit
+                # output2 = myTP_SenderTeleport.output['2'][0]
 
-            # if output2 == 1:
-            #     self.measureRes = [0,1]
-            # elif output2 == 3:
-            #     self.measureRes = [1,0]
-            # elif output2 == 2:
-            #     self.measureRes = [1,1]
-            print('sends res ' , self.measureRes)
-            self.node.ports[self.portNameCS1].tx_output(self.measureRes)
+                # if output2 == 1:
+                #     self.measureRes = [0,1]
+                # elif output2 == 3:
+                #     self.measureRes = [1,0]
+                # elif output2 == 2:
+                #     self.measureRes = [1,1]
+                print('sends res ' , self.measureRes)
+                self.node.ports[self.portNameCS1].tx_output(self.measureRes)
+                self.prepare_reset_qubit(i)
+            else:
+                meas = myTP_SenderTeleport.output['2'][0]
+                print('#@#@#@#@ measure output ' , meas)
+
+            
+            print('----------- remaining qbits ------------ i: ' , i)
+            for j in range(0,key_len):
+                MeasureByProb(self.qubits[j] , do_print=True)
+            print('------------------------------------')
 
             # self.node.ports[self.portNameCS2].tx_output(self.measureRes)
 
@@ -127,6 +163,32 @@ class QuantumTeleportationSender(NodeProtocol):
             operate([qubits[0] , qubits[i]] , CNOT)
         
         return qubits
+    def prepare_reset_qubit(self  , i):
+        if i + 1 >= len(self.key):
+            return
+        a = .9
+        b = .1
+        if self.key[i] == 0:
+            a = .1
+            b = .9
+        
+        # if self.measureRes[0] == 0 and self.measureRes[1] == 0:
+        #     t = a
+        #     a = b
+        #     b = t
+        # if self.measureRes[0] == 1 and self.measureRes[1] == 0:
+        #     t = a
+        #     a = a + b
+        #     b = -t
+        
+        # if self.measureRes[0] == 1 and self.measureRes[1] == 1:
+        #     # t = a
+            
+        #     b = b + a + a
+        #     a = -a
+        
+        self.cqubits[i+1] = AssignStatesBydm([self.cqubits[i+1]] , [np.array([[a,1],[1,b]])])[0]
+
     
     def send_qbit(self):
         qubit = self.processor.pop(2* key_len )

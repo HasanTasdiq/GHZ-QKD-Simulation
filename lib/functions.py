@@ -348,6 +348,12 @@ def MeasureByProb(qubit , do_print = False):
     if alpha.real > beta.real:
         return 0
     return 1
+def MeasureProb(qubit):
+    dm = reduced_dm(qubit)
+    alpha = complex(str(dm[0][0]).replace(')' , '').replace('(' , ''))
+    beta = complex(str(dm[1][1]).replace(')' , '').replace('(' , ''))
+
+    return alpha.real , beta.real
 
 
     # out_map = {}
