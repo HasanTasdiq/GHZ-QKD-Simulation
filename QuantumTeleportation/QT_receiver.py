@@ -166,11 +166,11 @@ class QuantumTeleportationReceiver(NodeProtocol):
             # print('------------------------------------')
 
 
-            myTP_ReceiverReset=TP_ReceiverReset(self.bellState,res)
-            self.processor.execute_program(myTP_ReceiverReset,qubit_mapping=[0])
-            #self.processor.set_program_done_callback(self.show_state,once=True) # see qstate
-            self.processor.set_program_fail_callback(ProgramFail,info=self.processor.name,once=True)
-            yield self.await_program(processor=self.processor)
+            # myTP_ReceiverReset=TP_ReceiverReset(self.bellState,res)
+            # self.processor.execute_program(myTP_ReceiverReset,qubit_mapping=[0])
+            # #self.processor.set_program_done_callback(self.show_state,once=True) # see qstate
+            # self.processor.set_program_fail_callback(ProgramFail,info=self.processor.name,once=True)
+            # yield self.await_program(processor=self.processor)
 
             fid = fidelity(
             self.receivedQubit, ns.qubits.outerprod((ns.S*ns.H*ns.s0).arr), squared=True)

@@ -1,7 +1,7 @@
 
 from netsquid.components.qprogram import QuantumProgram
 from netsquid.protocols import NodeProtocol
-from netsquid.components.instructions import INSTR_CNOT,INSTR_H,INSTR_MEASURE,INSTR_MEASURE_BELL
+from netsquid.components.instructions import INSTR_CNOT,INSTR_H,INSTR_Z,INSTR_X,INSTR_MEASURE,INSTR_MEASURE_BELL
 from netsquid.qubits import measure , reduced_dm, create_qubits,operate
 import numpy as np
 from netsquid.qubits.operators import X,H,CNOT
@@ -11,7 +11,7 @@ import time
 import sys
 scriptpath = "../lib/"
 sys.path.append(scriptpath)
-from functions import ProgramFail , MeasureByProb, AssignStatesBydm
+from functions import ProgramFail , MeasureByProb, AssignStatesBydm,MeasureProb
 
 
 key_len = 6
@@ -38,11 +38,29 @@ class TP_SenderTeleport(QuantumProgram):
         else:
             self.apply(INSTR_CNOT, [0, 1])
             self.apply(INSTR_MEASURE,qubit_indices=1, output_key='2',physical=True) # measure the origin state
+            self.apply(INSTR_MEASURE,qubit_indices=0, output_key='3',physical=True) # measure the origin state
 
 
 
         yield self.run(parallel=False)
 
+
+
+class TP_ResetTeleport(QuantumProgram):
+    
+    def __init__(self  , res):
+        super().__init__()
+        self.res = res
+        
+    def program(self):
+        # EPR-like       
+        if self.res[0] == 1:
+            self.apply(INSTR_Z, 0)
+        if self.res[1] == 1:
+            self.apply(INSTR_X, 0)
+
+
+        yield self.run(parallel=False)
 
 
 
@@ -69,7 +87,7 @@ class QuantumTeleportationSender(NodeProtocol):
         # self.processor.put(self.qubits + self.cqubits)
 
         # self.key = [randint(0,1) for i in range(key_len)]
-        self.key = [1,0,1,0,1 , 0]
+        self.key = [0,1,0,1 , 0 , 1]
         print('------key------ ' , self.key)
 
         
@@ -112,6 +130,7 @@ class QuantumTeleportationSender(NodeProtocol):
 
             start = time.time()
 
+            print('cqubits[i] before program ' , i , MeasureProb(self.cqubits[i]))
         
             myTP_SenderTeleport=TP_SenderTeleport(i)
             # self.processor.execute_program(myTP_SenderTeleport,qubit_mapping=list(range(2*key_len)))
@@ -135,10 +154,48 @@ class QuantumTeleportationSender(NodeProtocol):
                 #     self.measureRes = [1,1]
                 print('sends res ' , self.measureRes)
                 self.node.ports[self.portNameCS1].tx_output(self.measureRes)
-                self.prepare_reset_qubit(i)
+                
+
+                for j in range(i , key_len ):
+                    myTP_ResetTeleport=TP_ResetTeleport(self.measureRes)
+                    self.processor.execute_program(myTP_ResetTeleport,qubit_mapping=[j + key_len])
+                    self.processor.set_program_fail_callback(ProgramFail,info=self.processor.name,once=True)
+                    yield self.await_program(processor=self.processor)
+                self.prepare_reset_qubit(i+1)
+
             else:
+                
                 meas = myTP_SenderTeleport.output['2'][0]
                 print('#@#@#@#@ measure output ' , meas)
+
+                print('cqubits[i] ' , i , MeasureProb(self.cqubits[i]))
+                print('processor qubit i  ' , i , MeasureProb(self.processor.pop(i)))
+
+                print('qubits[i] ' , i , MeasureProb(self.qubits[i]))
+                print('qubits[i + 1] ' , i + 1 , MeasureProb(self.qubits[i+1]))
+                while meas != 0 :
+                    print('----------- remaining qbits in while ------------ i: ' , i)
+                    for j in range(0,key_len):
+                        MeasureByProb(self.qubits[j] , do_print=True)
+                    print('------------------------------------')
+
+
+                    myTP_SenderTeleport=TP_SenderTeleport(i)
+                    operate(self.cqubits[i], X)
+                    print('cqubits[i] in while loop after X ' , MeasureProb(self.cqubits[i]))
+
+                    self.qubits[i] = self.cqubits[i]
+                    self.prepare_reset_qubit(i)
+                    self.processor.execute_program(myTP_SenderTeleport,qubit_mapping=[i , i + key_len])
+                    self.processor.set_program_fail_callback(ProgramFail,info=self.processor.name,once=True)
+                    yield self.await_program(processor=self.processor)
+                    meas = myTP_SenderTeleport.output['2'][0]
+                    print('#@#@#@#@ measure output in while loop' , meas)
+                    break
+
+
+
+            # yield self.await_program(processor=self.processor)
 
             
             print('----------- remaining qbits ------------ i: ' , i)
@@ -166,11 +223,11 @@ class QuantumTeleportationSender(NodeProtocol):
     def prepare_reset_qubit(self  , i):
         if i + 1 >= len(self.key):
             return
-        a = .9
-        b = .1
-        if self.key[i] == 0:
-            a = .1
-            b = .9
+        b , a = MeasureProb(self.qubits[i ])
+        print('prepare reset bit ', a, b)
+        # if self.key[i] == 0:
+        #     a = .1
+        #     b = .9
         
         # if self.measureRes[0] == 0 and self.measureRes[1] == 0:
         #     t = a
@@ -186,10 +243,19 @@ class QuantumTeleportationSender(NodeProtocol):
             
         #     b = b + a + a
         #     a = -a
-        
-        self.cqubits[i+1] = AssignStatesBydm([self.cqubits[i+1]] , [np.array([[a,1],[1,b]])])[0]
+
+        qubit=create_qubits(1)
+        self.cqubits[i] = AssignStatesBydm([qubit] , [np.array([[a,1],[1,b]])])[0]
+        print('self.cqubits[i] = AssignStatesBydm '  , i  , MeasureProb(self.cqubits[i]))
+        print('self.qubits[i] = AssignStatesBydm '  , i  , MeasureProb(self.qubits[i]))
+        # self.reset_processor_mem()
 
     
+    def reset_processor_mem(self):
+        for i in range(2*key_len):
+            self.processor.pop(0)
+        self.processor.put(self.cqubits + self.qubits)
+
     def send_qbit(self):
         qubit = self.processor.pop(2* key_len )
         self.node.ports[self.portNameQS1].tx_output(qubit)
