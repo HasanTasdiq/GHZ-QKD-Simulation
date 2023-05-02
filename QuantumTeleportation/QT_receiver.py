@@ -141,8 +141,21 @@ class QuantumTeleportationReceiver(NodeProtocol):
             port=self.node.ports[self.portNameCR1]
             yield self.await_port_input(port)
             res=port.rx_input().items
-            # print("R get results:", res)
-            
+
+
+            while res[0] == 'check':
+                print('-----------receiver qbit after reset------------')
+                MeasureByProb(self.receivedQubit , do_print=True)
+                print('------------------------------------')
+                yield self.await_port_input(port)
+                res=port.rx_input().items
+
+            print("R get results:", res)
+            self.receivedQubit=self.processor.peek(0)[0]
+
+            print('-----------receiver qbit after R get results------------')
+            MeasureByProb(self.receivedQubit , do_print=True)
+            print('------------------------------------')
 
             # wait for delay ns
             if self.delay>0:
@@ -160,10 +173,10 @@ class QuantumTeleportationReceiver(NodeProtocol):
 
             # print(measure(self.receivedQubit))
             # print(MeasureByProb(self.receivedQubit))
-            # print('-----------received qbit------------')
-            key.append(MeasureByProb(self.receivedQubit , do_print=False))
-            # key.append(self.extractRes(self.receivedQubit , res))
-            # print('------------------------------------')
+            print('-----------received qbit------------' , i)
+            key.append(MeasureByProb(self.receivedQubit , do_print=True))
+            # # key.append(self.extractRes(self.receivedQubit , res))
+            print('------------------------------------')
 
 
             # myTP_ReceiverReset=TP_ReceiverReset(self.bellState,res)
@@ -176,6 +189,8 @@ class QuantumTeleportationReceiver(NodeProtocol):
             self.receivedQubit, ns.qubits.outerprod((ns.S*ns.H*ns.s0).arr), squared=True)
 
             self.prevRes = res
+
+
 
             # print('fidelity of received qbit' , fid)
 
