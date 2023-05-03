@@ -150,10 +150,10 @@ class QuantumTeleportationReceiver(NodeProtocol):
                 yield self.await_port_input(port)
                 res=port.rx_input().items
 
-            print("R get results:", res)
+            print("R get results:", i , res)
             self.receivedQubit=self.processor.peek(0)[0]
 
-            print('-----------receiver qbit after R get results------------')
+            print('-----------receiver qbit after R get results------------' , i)
             MeasureByProb(self.receivedQubit , do_print=True)
             print('------------------------------------')
 
