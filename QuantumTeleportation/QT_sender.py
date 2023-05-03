@@ -15,7 +15,7 @@ sys.path.append(scriptpath)
 from functions import ProgramFail , MeasureByProb, AssignStatesBydm,MeasureProb
 
 
-key_len = 2
+key_len = 6
 
 class TP_SenderTeleport(QuantumProgram):
     
@@ -210,92 +210,99 @@ class QuantumTeleportationSender(NodeProtocol):
                         self.processor.execute_program(myTP_ResetTeleport,qubit_mapping=[j + key_len])
                     self.processor.set_program_fail_callback(ProgramFail,info=self.processor.name,once=True)
                     yield self.await_program(processor=self.processor)
-                # print('after reset teleport')
-                # self.print_qubits( i , count)
+                print('after reset teleport i:',i)
+                self.print_qubits( i , count)
                 
                 # print('+++++++ before reset')
+
                 i = i+1
+
+                if i < key_len:
                 
-                # print('======= in reset')
-                self.prepare_reset_qubit(i)
+                    # print('======= in reset')
+                    self.prepare_reset_qubit(i)
 
-                myTP_ResetQubit=TP_ResetQubit(i)
-                self.processor.execute_program(myTP_ResetQubit,qubit_mapping=[i , i + key_len])
-                self.processor.set_program_fail_callback(ProgramFail,info=self.processor.name,once=True)
-                yield self.await_program(processor=self.processor)
-
-
-                meas = myTP_ResetQubit.output['2'][0]
-                # print('#@#@#@#@ measure output ' , meas)
-
-                # print('self.processor.peek(i) ' , i , MeasureProb(self.processor.peek(i)))
-
-                # print('qubits[i + 1] ' , i + 1 , MeasureProb(self.qubits[i+1]))
-                flip = True
-                        
-                p , q = MeasureProb(self.processor.peek(2 *key_len - 1))
-                # print('**##**##**##**##**##**##**##**##**##**###** ' , p , q)
-                # while meas != 0 :
-                while p != q and i < key_len -1 :
-
-                    if meas == 1:
-                        if flip:
-                            operate(self.processor.peek(i), X)
-                        else:
-                            operate(self.processor.peek(i + key_len), X)
-
-
-
-                    # print('----------- remaining qbits in while ------------ i: ' , i , 'count:' , count)
-                    # for j in range(0,key_len):
-                    #     try:
-                    #         MeasureByProb(self.processor.peek(j + key_len) , do_print=True)
-                    #     except:
-                    #         print('exception')
-                    # print('------------------------------------')
-
-
-
-
-                    # print('#### retry: ' , count)
-                                
-                    # tmp_qbit = self.processor.peek(i)
-                    # print('self.processor.peek(i) in while loop after X ' , MeasureProb(self.processor.peek(i)))
-
-                    # self.processor.put(tmp_qbit , key_len + i)
-                    # print('self.processor.peek(i + keylen) in while loop after put' , MeasureProb(self.processor.peek(i + key_len)))
-                    # print('self.processor.peek(i) in while loop before prep ' , MeasureProb(self.processor.peek(i)))
-
-                    self.prepare_reset_qubit(i ,not flip , count)
-                    # print('after prep in while')
-
-                    # print('self.processor.peek(i) in while loop after prep' , MeasureProb(self.processor.peek(i)))
-                    # print('self.processor.peek(i + keylen) in while loop after prep' , MeasureProb(self.processor.peek(i + key_len)))
-
-
-                    myTP_ResetQubit=TP_ResetQubit(i, flip)
-                    if flip:
-                        self.processor.execute_program(myTP_ResetQubit,qubit_mapping=[i + key_len, i])
-                    else:
-                        self.processor.execute_program(myTP_ResetQubit,qubit_mapping=[i, i + key_len])
-
+                    myTP_ResetQubit=TP_ResetQubit(i)
+                    self.processor.execute_program(myTP_ResetQubit,qubit_mapping=[i , i + key_len])
                     self.processor.set_program_fail_callback(ProgramFail,info=self.processor.name,once=True)
                     yield self.await_program(processor=self.processor)
-                    meas = myTP_ResetQubit.output['2'][0]
-                    # print('#@#@#@#@ measure output in while loop' , meas)
-                    p , q = MeasureProb(self.processor.peek(2 *key_len - 1))
-                    # print('**##**##**##**##**##**##**##**##**##**###** in loop  ' , p , q)
 
-                    flip = not flip
-                    count = count +1
-                    # if count > 5:
-                    #     break
-                    # time.sleep(1)
-                mem_flip = flip
+
+                    meas = myTP_ResetQubit.output['2'][0]
+                    # print('#@#@#@#@ measure output ' , meas)
+
+                    # print('self.processor.peek(i) ' , i , MeasureProb(self.processor.peek(i)))
+
+                    # print('qubits[i + 1] ' , i + 1 , MeasureProb(self.qubits[i+1]))
+                    flip = True
+                            
+                    p , q = MeasureProb(self.processor.peek(2 *key_len - 1))
+                    # print('**##**##**##**##**##**##**##**##**##**###** ' , p , q)
+                    # while meas != 0 :
+                    print('while p != q and i < key_len' , i)
+
+                    while p != q :
+
+                        if meas == 1:
+                            if flip:
+                                operate(self.processor.peek(i), X)
+                            else:
+                                operate(self.processor.peek(i + key_len), X)
+
+
+
+                        # print('----------- remaining qbits in while ------------ i: ' , i , 'count:' , count)
+                        # for j in range(0,key_len):
+                        #     try:
+                        #         MeasureByProb(self.processor.peek(j + key_len) , do_print=True)
+                        #     except:
+                        #         print('exception')
+                        # print('------------------------------------')
+
+
+
+
+                        # print('#### retry: ' , count)
+                                    
+                        # tmp_qbit = self.processor.peek(i)
+                        # print('self.processor.peek(i) in while loop after X ' , MeasureProb(self.processor.peek(i)))
+
+                        # self.processor.put(tmp_qbit , key_len + i)
+                        # print('self.processor.peek(i + keylen) in while loop after put' , MeasureProb(self.processor.peek(i + key_len)))
+                        # print('self.processor.peek(i) in while loop before prep ' , MeasureProb(self.processor.peek(i)))
+
+                        self.prepare_reset_qubit(i ,not flip , count)
+                        # print('after prep in while')
+
+                        # print('self.processor.peek(i) in while loop after prep' , MeasureProb(self.processor.peek(i)))
+                        # print('self.processor.peek(i + keylen) in while loop after prep' , MeasureProb(self.processor.peek(i + key_len)))
+
+
+                        myTP_ResetQubit=TP_ResetQubit(i, flip)
+                        if flip:
+                            self.processor.execute_program(myTP_ResetQubit,qubit_mapping=[i + key_len, i])
+                        else:
+                            self.processor.execute_program(myTP_ResetQubit,qubit_mapping=[i, i + key_len])
+
+                        self.processor.set_program_fail_callback(ProgramFail,info=self.processor.name,once=True)
+                        yield self.await_program(processor=self.processor)
+                        meas = myTP_ResetQubit.output['2'][0]
+                        # print('#@#@#@#@ measure output in while loop' , meas)
+                        p , q = MeasureProb(self.processor.peek(2 *key_len - 1))
+                        # print('**##**##**##**##**##**##**##**##**##**###** in loop  ' , p , q)
+
+                        flip = not flip
+                        count = count +1
+                        # if count > 5:
+                        #     break
+                        # time.sleep(1)
+                    mem_flip = flip
                 i = i-1
-                # print('+++++++ after reset')
+                print('+++++++ after reset mem_flip:',mem_flip)
+                self.print_qubits( i , count)
+
                 # time.sleep(1)
-                # self.node.ports[self.portNameCS1].tx_output('check')
+                self.node.ports[self.portNameCS1].tx_output('check')
 
 
 
@@ -388,8 +395,7 @@ class QuantumTeleportationSender(NodeProtocol):
 
             # print('------------------------------------')
             print('sent key ' , self.key)
-            print('at last of it: ' , i)
-            self.print_qubits( i , count)
+            # print('at last of it: ' , i)
 
             # time.sleep(1)
 
@@ -408,11 +414,11 @@ class QuantumTeleportationSender(NodeProtocol):
                 MeasureByProb(self.processor.peek(j + key_len) , do_print=True)
             except:
                 print('exception')
-        print('other: ')
+        print('other: 2 * key_len ')
         MeasureByProb(self.processor.peek(2 * key_len) , do_print=True)
-        print('other in i : ' , i)
+        print('other in i  : ' , i)
 
-        MeasureByProb(self.processor.peek(i + 1) , do_print=True)
+        MeasureByProb(self.processor.peek(i ) , do_print=True)
         print('------------------------------------')
     def gen_qubits(self):
         qubits=create_qubits(key_len + 1)
@@ -428,8 +434,8 @@ class QuantumTeleportationSender(NodeProtocol):
         return qubits
     def prepare_reset_qubit(self  , i , for_next = True , num_try = 1):
         # print('in prep reset')
-        if i + 1 >= len(self.key):
-            return
+        # if i + 1 >= len(self.key):
+        #     return
         
         alpha, beta = MeasureProb(self.processor.peek(i +  (key_len if for_next else 0)))
         # a , b = alpha , beta

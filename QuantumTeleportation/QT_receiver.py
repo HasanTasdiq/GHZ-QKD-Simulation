@@ -144,7 +144,7 @@ class QuantumTeleportationReceiver(NodeProtocol):
 
 
             while res[0] == 'check':
-                print('-----------receiver qbit after reset------------')
+                print('-----------receiver qbit after reset------------ i: ' , i)
                 MeasureByProb(self.receivedQubit , do_print=True)
                 print('------------------------------------')
                 yield self.await_port_input(port)
