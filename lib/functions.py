@@ -17,7 +17,7 @@ logging.basicConfig(level=logging.ERROR)
 mylogger = logging.getLogger(__name__)
 '''
 
-
+it_reset = 0
 # General functions/Quantum programs
 
 # Z Rotation operators 
@@ -381,6 +381,11 @@ def MeasureProb(qubit):
     
     # return out_map
 
+def add_it_count(count , i):
+    global it_reset
+    it_reset += count
+    # print('it_reset ' , it_reset , count , i)
+    return 0
 def get_fidelity(qbit):
     fid = ns.qubits.fidelity(
             qbit, ns.qubits.outerprod((ns.S*ns.H*ns.s0).arr), squared=True)

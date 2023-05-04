@@ -150,12 +150,12 @@ class QuantumTeleportationReceiver(NodeProtocol):
                 yield self.await_port_input(port)
                 res=port.rx_input().items
 
-            print("R get results:", i , res)
+            # print("R get results:", i , res)
             self.receivedQubit=self.processor.peek(0)[0]
 
-            print('-----------receiver qbit after R get results------------' , i)
-            MeasureByProb(self.receivedQubit , do_print=True)
-            print('------------------------------------')
+            # print('-----------receiver qbit after R get results------------' , i)
+            # MeasureByProb(self.receivedQubit , do_print=True)
+            # print('------------------------------------')
 
             # wait for delay ns
             if self.delay>0:
@@ -173,10 +173,10 @@ class QuantumTeleportationReceiver(NodeProtocol):
 
             # print(measure(self.receivedQubit))
             # print(MeasureByProb(self.receivedQubit))
-            print('-----------received qbit------------' , i)
-            key.append(MeasureByProb(self.receivedQubit , do_print=True))
+            # print('-----------received qbit------------' , i)
+            key.append(MeasureByProb(self.receivedQubit , do_print=False))
             # # key.append(self.extractRes(self.receivedQubit , res))
-            print('------------------------------------')
+            # print('------------------------------------')
 
 
             # myTP_ReceiverReset=TP_ReceiverReset(self.bellState,res)
@@ -194,13 +194,14 @@ class QuantumTeleportationReceiver(NodeProtocol):
 
             # print('fidelity of received qbit' , fid)
 
-        print('received key at : ' , self.node.name  , key)
+        # print('received' , self.node.name  , key)
+        print('received ' , key)
 
 
     def show_state(self):
         set_qstate_formalism(QFormalism.DM)
         tmp=self.processor.pop(0)[0]
-        print("R final state:",tmp.qstate.dm)
+        # print("R final state:",tmp.qstate.dm)
     
     def extractRes(self , qubit , res):
         # print('#########')
