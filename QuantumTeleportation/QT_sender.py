@@ -15,7 +15,7 @@ sys.path.append(scriptpath)
 from functions import ProgramFail , MeasureByProb, AssignStatesBydm,MeasureProb,add_it_count
 
 
-key_len = 8
+key_len = 6
 
 class TP_SenderTeleport(QuantumProgram):
     
@@ -161,6 +161,7 @@ class QuantumTeleportationSender(NodeProtocol):
             #     break
 
 
+            # time.sleep(5)
             start = time.time()
             count = 0
             # print('self.processor.peek(i) before program ' , i , MeasureProb(self.processor.peek(i)) , 'flip:',mem_flip)
@@ -312,10 +313,10 @@ class QuantumTeleportationSender(NodeProtocol):
         alpha, beta = MeasureProb(self.processor.peek(i +  (key_len if for_next else 0)))
         # a , b = alpha , beta
 
-        b = alpha /  math.sqrt( alpha + beta)
-        a = beta /  math.sqrt( alpha + beta)
-        # b = alpha 
-        # a = beta 
+        # b = alpha /  math.sqrt( alpha + beta)
+        # a = beta /  math.sqrt( alpha + beta)
+        b = alpha 
+        a = beta 
         if num_try % 1 == 0:
             # b,a = a,b
             b,a = 0.5 / a , 0.5/b
@@ -323,6 +324,8 @@ class QuantumTeleportationSender(NodeProtocol):
         # print('for alpha:' , alpha , a , 'for beta:',beta,b)
         qubit=create_qubits(1)
         qubit = AssignStatesBydm([qubit] , [np.array([[a,1],[1,b]])])[0]
+        # print(MeasureProb(qubit))
+        
         if for_next:
             self.processor.put(qubit , i)
         else:

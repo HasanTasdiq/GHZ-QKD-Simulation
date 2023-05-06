@@ -29,7 +29,7 @@ sys.path.append(scriptpath)
 from functions import AssignStatesBydm , MeasureByProb,get_fidelity,it_reset
 
 
-def run_Teleport_sim(runtimes=100,fibre_len=10**-9,memNoiseMmodel=None,processorNoiseModel=None,delay=0
+def run_Teleport_sim(runtimes=1,fibre_len=10**-9,memNoiseMmodel=None,processorNoiseModel=None,delay=0
                ,loss_init=0,loss_len=0,QChV=3*10**-4,CChV=3*10**-4):
     
     
@@ -38,7 +38,8 @@ def run_Teleport_sim(runtimes=100,fibre_len=10**-9,memNoiseMmodel=None,processor
         
         ns.sim_reset()
         print('====running:' , i , '===========')
-
+        mem_noise_model =     DepolarNoiseModel(depolar_rate=5000,
+            time_independent=False)
         # nodes====================================================================
 
         nodeSender   = Node("SenderNode"    , port_names=["portC_Sender" , "portC_Sender2" , 'portQ_Sender' , 'portQ_Sender2'])
@@ -47,7 +48,7 @@ def run_Teleport_sim(runtimes=100,fibre_len=10**-9,memNoiseMmodel=None,processor
 
         # processors===============================================================
         processorSender=QuantumProcessor("processorSender", num_positions=1000,
-            mem_noise_models=memNoiseMmodel, phys_instructions=[
+            mem_noise_models=mem_noise_model, phys_instructions=[
             PhysicalInstruction(INSTR_X, duration=1, quantum_noise_model=processorNoiseModel),
             PhysicalInstruction(INSTR_Z, duration=1, quantum_noise_model=processorNoiseModel),
             PhysicalInstruction(INSTR_H, duration=1, quantum_noise_model=processorNoiseModel),
@@ -57,7 +58,7 @@ def run_Teleport_sim(runtimes=100,fibre_len=10**-9,memNoiseMmodel=None,processor
 
 
         processorReceiver=QuantumProcessor("processorReceiver", num_positions=1,
-            mem_noise_models=memNoiseMmodel, phys_instructions=[
+            mem_noise_models=mem_noise_model, phys_instructions=[
             PhysicalInstruction(INSTR_X, duration=1, quantum_noise_model=processorNoiseModel),
             PhysicalInstruction(INSTR_Z, duration=1, quantum_noise_model=processorNoiseModel),
             PhysicalInstruction(INSTR_H, duration=1, quantum_noise_model=processorNoiseModel),
@@ -74,11 +75,12 @@ def run_Teleport_sim(runtimes=100,fibre_len=10**-9,memNoiseMmodel=None,processor
 
         # channels==================================================================
 
-        MyQChannel=QuantumChannel("QChannel_A->B",delay=.1
-            ,length=5000
-            ,models={"myFibreLossModel": FibreLossModel(p_loss_init=.1, p_loss_length=.1, rng=None)
-            ,"mydelay_model": FibreDelayModel(c=2.083*10**5)
-            ,"myFibreNoiseModel":DepolarNoiseModel(depolar_rate=0.1, time_independent=False)})
+        MyQChannel=QuantumChannel("QChannel_A->B",delay=.5
+            ,length=500000
+            ,models={"myFibreLossModel": FibreLossModel(p_loss_init=.5, p_loss_length=.5, rng=None)
+            # ,"mydelay_model": FibreDelayModel(c=2.083*10**5)
+            ,"mydelay_model": None
+            ,"myFibreNoiseModel":DepolarNoiseModel(depolar_rate=5000, time_independent=False)})
 
         MyQChannel2=QuantumChannel("QChannel_A->C",delay=0
             ,length=5000
@@ -208,6 +210,8 @@ def run_Teleport_sim(runtimes=100,fibre_len=10**-9,memNoiseMmodel=None,processor
 
 if __name__ == '__main__':
     start = time.time()
+
+
     run_Teleport_sim()
     end = time.time()
     print('total time ', end - start)

@@ -5,7 +5,7 @@ from netsquid.components.qprogram import QuantumProgram
 from netsquid.qubits.qstate import QState
 from netsquid.qubits import set_qstate_formalism, QFormalism
 from netsquid.components.instructions import INSTR_X,INSTR_Z,INSTR_H
-from netsquid.qubits import measure , reduced_dm,fidelity,outerprod
+from netsquid.qubits import measure , reduced_dm,fidelity,outerprod,ketstates
 import netsquid as ns
 
 
@@ -187,12 +187,15 @@ class QuantumTeleportationReceiver(NodeProtocol):
 
             fid = fidelity(
             self.receivedQubit, ns.qubits.outerprod((ns.S*ns.H*ns.s0).arr), squared=True)
+            # fid = fidelity(
+            # self.receivedQubit, ketstates.s0, squared=True)
 
             self.prevRes = res
 
 
 
-            # print('fidelity of received qbit' , fid)
+            print('fidelity of received qbit' , fid)
+            print('reduced dm ' , reduced_dm(self.receivedQubit)[1][1].real)
 
         # print('received' , self.node.name  , key)
         print('received ' , key)
