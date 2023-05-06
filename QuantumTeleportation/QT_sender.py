@@ -161,7 +161,7 @@ class QuantumTeleportationSender(NodeProtocol):
             #     break
 
 
-            # time.sleep(5)
+            time.sleep(5)
             start = time.time()
             count = 0
             # print('self.processor.peek(i) before program ' , i , MeasureProb(self.processor.peek(i)) , 'flip:',mem_flip)
