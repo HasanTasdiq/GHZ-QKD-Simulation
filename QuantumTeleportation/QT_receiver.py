@@ -185,17 +185,18 @@ class QuantumTeleportationReceiver(NodeProtocol):
             # self.processor.set_program_fail_callback(ProgramFail,info=self.processor.name,once=True)
             # yield self.await_program(processor=self.processor)
 
-            fid = fidelity(
-            self.receivedQubit, ns.qubits.outerprod((ns.S*ns.H*ns.s0).arr), squared=True)
             # fid = fidelity(
-            # self.receivedQubit, ketstates.s0, squared=True)
+            # self.receivedQubit, ns.qubits.outerprod((ns.S*ns.H*ns.s0).arr), squared=True)
+            fid = fidelity(
+            self.receivedQubit, ketstates.s1, squared=True)
 
             self.prevRes = res
 
 
 
-            print('fidelity of received qbit' , fid)
-            print('reduced dm ' , reduced_dm(self.receivedQubit)[1][1].real)
+            print('fidelity of received qbit' , fid/0.6)
+            print('probs: ' , MeasureProb(self.receivedQubit))
+            # print('reduced dm ' , reduced_dm(self.receivedQubit)[1][1].real)
 
         # print('received' , self.node.name  , key)
         print('received ' , key)

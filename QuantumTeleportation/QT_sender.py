@@ -113,7 +113,7 @@ class QuantumTeleportationSender(NodeProtocol):
         # self.processor.put(self.qubits + self.cqubits)
 
         self.key = [randint(0,1) for i in range(key_len)]
-        # self.key = [0,1,0,1 , 0 , 1]
+        self.key = [1,1,1,1,1,1]
         # print('------key------ ' , self.key)
 
         
@@ -161,7 +161,7 @@ class QuantumTeleportationSender(NodeProtocol):
             #     break
 
 
-            time.sleep(5)
+            # time.sleep(5)
             start = time.time()
             count = 0
             # print('self.processor.peek(i) before program ' , i , MeasureProb(self.processor.peek(i)) , 'flip:',mem_flip)
@@ -169,6 +169,8 @@ class QuantumTeleportationSender(NodeProtocol):
             qk_bit = create_qubits(1)
             a = .6
             b = .4
+            # a = 1
+            # b = 0
             if self.key[i] == 1:
                 a ,b = b , a
 

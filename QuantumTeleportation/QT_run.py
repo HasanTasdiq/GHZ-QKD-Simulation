@@ -35,10 +35,14 @@ def run_Teleport_sim(runtimes=1,fibre_len=10**-9,memNoiseMmodel=None,processorNo
     
     
     for i in range(runtimes): 
+        link_len = 100
+        delay = .1
+        mem_depolar_rate = 100000000
+        depolar_rate = 100000
         
         ns.sim_reset()
         print('====running:' , i , '===========')
-        mem_noise_model =     DepolarNoiseModel(depolar_rate=5000,
+        mem_noise_model =     DepolarNoiseModel(depolar_rate=mem_depolar_rate,
             time_independent=False)
         # nodes====================================================================
 
@@ -54,7 +58,7 @@ def run_Teleport_sim(runtimes=1,fibre_len=10**-9,memNoiseMmodel=None,processorNo
             PhysicalInstruction(INSTR_H, duration=1, quantum_noise_model=processorNoiseModel),
             PhysicalInstruction(INSTR_CNOT,duration=1,quantum_noise_model=processorNoiseModel),
             PhysicalInstruction(INSTR_MEASURE, duration=1,quantum_noise_model=processorNoiseModel, parallel=False),
-            PhysicalInstruction(INSTR_MEASURE_BELL, duration=1,quantum_noise_model=processorNoiseModel, parallel=False)])
+            PhysicalInstruction(INSTR_MEASURE_BELL, duration=2,quantum_noise_model=processorNoiseModel, parallel=False)])
 
 
         processorReceiver=QuantumProcessor("processorReceiver", num_positions=1,
@@ -75,14 +79,14 @@ def run_Teleport_sim(runtimes=1,fibre_len=10**-9,memNoiseMmodel=None,processorNo
 
         # channels==================================================================
 
-        MyQChannel=QuantumChannel("QChannel_A->B",delay=.5
-            ,length=500000
+        MyQChannel=QuantumChannel("QChannel_A->B",delay=delay
+            ,length=link_len
             ,models={"myFibreLossModel": FibreLossModel(p_loss_init=.5, p_loss_length=.5, rng=None)
-            # ,"mydelay_model": FibreDelayModel(c=2.083*10**5)
-            ,"mydelay_model": None
-            ,"myFibreNoiseModel":DepolarNoiseModel(depolar_rate=5000, time_independent=False)})
+            ,"mydelay_model": FibreDelayModel(c=2.083*10**5)
+            # ,"mydelay_model": None
+            ,"myFibreNoiseModel":DepolarNoiseModel(depolar_rate=depolar_rate, time_independent=False)})
 
-        MyQChannel2=QuantumChannel("QChannel_A->C",delay=0
+        MyQChannel2=QuantumChannel("QChannel_A->C",delay=delay
             ,length=5000
             ,models={"myFibreLossModel": FibreLossModel(p_loss_init=.1, p_loss_length=.1, rng=None)
             ,"mydelay_model": FibreDelayModel(c=2.083*10**5)
@@ -98,7 +102,11 @@ def run_Teleport_sim(runtimes=1,fibre_len=10**-9,memNoiseMmodel=None,processorNo
             remote_port_name=nodeReceiver2.ports["portQ_Receiver2"].name)
         
         MyCChannel = ClassicalChannel("CChannel_S->R",delay=delay
-            ,length=fibre_len)
+            ,length=link_len
+            ,models={"myFibreLossModel": FibreLossModel(p_loss_init=.1, p_loss_length=.1, rng=None)
+            ,"mydelay_model": FibreDelayModel(c=2.083*10**5)
+            # ,"mydelay_model": None
+            ,"myFibreNoiseModel":DepolarNoiseModel(depolar_rate=depolar_rate, time_independent=False)})
 
         MyCChannel2 = ClassicalChannel("CChannel_S->R2",delay=delay
             ,length=fibre_len)
@@ -204,7 +212,7 @@ def run_Teleport_sim(runtimes=1,fibre_len=10**-9,memNoiseMmodel=None,processorNo
         #ns.logger.setLevel(1)
         stats = ns.sim_run()
     global it_reset
-    print('number of reset step:' , it_reset)
+    # print('number of reset step:' , it_reset)
     return 0
 
 
