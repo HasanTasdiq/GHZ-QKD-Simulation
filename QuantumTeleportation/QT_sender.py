@@ -16,7 +16,7 @@ sys.path.append(scriptpath)
 from functions import ProgramFail , MeasureByProb, AssignStatesBydm,MeasureProb,add_it_count
 
 
-key_len = 7
+key_len = 5
 
 class TP_SenderTeleport(QuantumProgram):
     
@@ -367,7 +367,7 @@ class QuantumTeleportationSender(NodeProtocol):
         # a = .5/alpha
         # b = 1 - a
 
-        a , b = a/(a +b) , b/(a+b)
+        # a , b = a/(a +b) , b/(a+b)
 
         # print('for alpha:' , alpha , a , 'for beta:',beta,b)
         qubit=create_qubits(1)
