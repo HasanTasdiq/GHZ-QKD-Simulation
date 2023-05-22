@@ -2,12 +2,13 @@
 from netsquid.components.qprogram import QuantumProgram
 from netsquid.protocols import NodeProtocol
 from netsquid.components.instructions import INSTR_CNOT,INSTR_H,INSTR_Z,INSTR_X,INSTR_MEASURE,INSTR_MEASURE_BELL
-from netsquid.qubits import measure , reduced_dm, create_qubits,operate
+from netsquid.qubits import measure , reduced_dm, create_qubits,operate,gmeasure,assign_qstate
 import numpy as np
-from netsquid.qubits.operators import X,H,CNOT
+from netsquid.qubits.operators import X,H,CNOT,Z
 from random import randint
 import time
 import math
+import netsquid as ns
 
 import sys
 scriptpath = "../lib/"
@@ -15,7 +16,7 @@ sys.path.append(scriptpath)
 from functions import ProgramFail , MeasureByProb, AssignStatesBydm,MeasureProb,add_it_count
 
 
-key_len = 6
+key_len = 7
 
 class TP_SenderTeleport(QuantumProgram):
     
@@ -113,7 +114,7 @@ class QuantumTeleportationSender(NodeProtocol):
         # self.processor.put(self.qubits + self.cqubits)
 
         self.key = [randint(0,1) for i in range(key_len)]
-        self.key = [1,1,1,1,1,1]
+        # self.key = [1,1,1,1,1,1,1]
         # print('------key------ ' , self.key)
 
         
@@ -207,6 +208,7 @@ class QuantumTeleportationSender(NodeProtocol):
                     self.processor.execute_program(myTP_ResetTeleport,qubit_mapping=[j + key_len])
                     self.processor.set_program_fail_callback(ProgramFail,info=self.processor.name,once=True)
                     yield self.await_program(processor=self.processor)
+                # self.print_qubits( i , count)
 
                 
                 # print('+++++++ before reset')
@@ -279,7 +281,7 @@ class QuantumTeleportationSender(NodeProtocol):
                     # print('rrrrrrrrrrrreset at attempt: ' , count)
                 i = i-1
                 # print('+++++++ after reset mem_flip:',mem_flip)
-                # self.print_qubits( i , count)
+            # self.print_qubits( i , count)
             add_it_count(count , i )
 
 
@@ -306,8 +308,47 @@ class QuantumTeleportationSender(NodeProtocol):
         qubits=create_qubits(key_len + 1)
         operate(qubits[0] , H)
 
+
+        # ns.qubits.delay_depolarize(qubits[0], depolar_rate=1e7, delay=500)
+        # fidelity = ns.qubits.fidelity([qubits[0]], reference_state=ns.h0, squared=True)
+        # print(f"Fidelity in gen is {fidelity:.3f}")
+
+
+
+        prev_dm = None
+
         for i in range(1 , key_len + 1 ):
+            dm = reduced_dm(qubits[0:2])
+            # if prev_dm is not None:
+                
+            #     # print('in gen compare for it: ' , i , (prev_dm==dm))
+            #     print('in gen ' , i , dm , '\n')
+            prev_dm = dm
             operate([qubits[0] , qubits[i]] , CNOT)
+
+        # print('in gen final ' , reduced_dm(qubits[0:2]) , '\n')
+        # dm1 = reduced_dm(qubits)
+
+        # qubit_C=create_qubits(1)
+        # # operate(qubit_C , H)
+        # # print('in gen qubit_C ' , reduced_dm(qubit_C) , '\n')
+        # operate([qubits[key_len] , qubit_C[0]] , CNOT)
+
+        # dm2 = reduced_dm(qubits)
+
+        # print('in gen eve ' , reduced_dm(qubits[0:2]) , '\n')
+
+        # print('comp@@ ' , dm1 == dm2)
+
+        # ns.qubits.delay_depolarize(received_qubit[0], depolar_rate=1e7, delay=20)
+
+        # operate(qubits[-1] , H)
+
+        # ns.qubits.delay_depolarize(qubits[-1], depolar_rate=1e7, delay=0)
+        # fidelity = ns.qubits.fidelity([qubits[-1]], reference_state=ns.h0, squared=True)
+        # print(f"Fidelity in gen is {fidelity:.3f}")
+        
+        
         
         return qubits
     def prepare_reset_qubit(self  , i , for_next = True , num_try = 1):
@@ -322,10 +363,20 @@ class QuantumTeleportationSender(NodeProtocol):
         if num_try % 1 == 0:
             # b,a = a,b
             b,a = 0.5 / a , 0.5/b
+        
+        # a = .5/alpha
+        # b = 1 - a
 
-        # print('for alpha:' , alpha , a , 'for beta:',beta,b)
+        a , b = a/(a +b) , b/(a+b)
+
+        print('for alpha:' , alpha , a , 'for beta:',beta,b)
         qubit=create_qubits(1)
+        # assign_qstate(qubit, np.diag([0.6, 0.5]))
+        # print('assigned qstate ' , qubit[0].qstate.qrepr)
         qubit = AssignStatesBydm([qubit] , [np.array([[a,1],[1,b]])])[0]
+
+        # P_0, P_1 = Z.projectors
+        # print('gmeasure' , gmeasure(qubit, [P_0, P_1]))
         # print(MeasureProb(qubit))
         
         if for_next:

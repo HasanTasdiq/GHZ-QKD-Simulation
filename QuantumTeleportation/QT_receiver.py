@@ -7,12 +7,12 @@ from netsquid.qubits import set_qstate_formalism, QFormalism
 from netsquid.components.instructions import INSTR_X,INSTR_Z,INSTR_H
 from netsquid.qubits import measure , reduced_dm,fidelity,outerprod,ketstates
 import netsquid as ns
-
+import numpy as np
 
 import sys
 scriptpath = "../lib/"
 sys.path.append(scriptpath)
-from functions import ProgramFail , MeasureByProb,MeasureProb
+from functions import ProgramFail , MeasureByProb,MeasureProb,AssignStatesBydm
 
 from QT_sender import key_len
 
@@ -129,7 +129,19 @@ class QuantumTeleportationReceiver(NodeProtocol):
         
         yield self.await_port_input(port)
         received_qubit = port.rx_input().items
+
+        # fid = fidelity(
+        #     received_qubit, ns.h0, squared=True)
+        # print('fidelity of received qbit' , fid)
+
+        # F = 1
+        # a = np.square(np.sqrt(0.5) * F + np.sqrt(0.5* np.square(F) - 0.5 + 1 - np.square(F)))
+        # print("val of a in receiver side " ,a)
+        # b = 1 - a
+        # received_qubit = AssignStatesBydm([received_qubit] , [np.array([[a,1],[1,b]])])[0]
+
         self.processor.put(received_qubit)
+
         self.prevRes = []
 
         self.prevAlpha = 1
@@ -187,18 +199,20 @@ class QuantumTeleportationReceiver(NodeProtocol):
 
             # fid = fidelity(
             # self.receivedQubit, ns.qubits.outerprod((ns.S*ns.H*ns.s0).arr), squared=True)
-            fid = fidelity(
-            self.receivedQubit, ketstates.s1, squared=True)
+            # ns.qubits.delay_depolarize(self.receivedQubit, depolar_rate=1e9, delay=2000)
+            # fid = fidelity(
+            # self.receivedQubit, np.array([[.4,1],[1,.6]]), squared=True)
 
             self.prevRes = res
 
 
 
-            print('fidelity of received qbit' , fid/0.6)
-            print('probs: ' , MeasureProb(self.receivedQubit))
-            # print('reduced dm ' , reduced_dm(self.receivedQubit)[1][1].real)
+            # print('fidelity of received qbit' , fid)
+            # print('probs: ' , MeasureProb(self.receivedQubit))
+            # print('reduced dm ' , reduced_dm(self.receivedQubit))
 
         # print('received' , self.node.name  , key)
+        self.key = key
         print('received ' , key)
 
 

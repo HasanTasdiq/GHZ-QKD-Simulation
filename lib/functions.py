@@ -391,6 +391,12 @@ def get_fidelity(qbit):
             qbit, ns.qubits.outerprod((ns.S*ns.H*ns.s0).arr), squared=True)
     return fid
 
+def get_bit_error(sent_key , received_key):
+    error = 0
+    for i in range(0,len(sent_key)):
+        if sent_key[i] != received_key[i]:
+            error += 1
+    return error
 
 
 
