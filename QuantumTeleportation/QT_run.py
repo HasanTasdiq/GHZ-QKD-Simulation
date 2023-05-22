@@ -221,15 +221,15 @@ def run_Teleport_sim(runtimes=10,fibre_len=10**-9,memNoiseMmodel=None,processorN
         myQT_Sender.start()
         #ns.logger.setLevel(1)
         stats = ns.sim_run()
-        time.sleep(.5)
-        sent_key = myQT_Sender.key
-        key_len = len(sent_key)
-        received_key = myQT_Receiver.key
-        error += get_bit_error(sent_key , received_key)
+        # time.sleep(.5)
+        # sent_key = myQT_Sender.key
+        # key_len = len(sent_key)
+        # received_key = myQT_Receiver.key
+        # error += get_bit_error(sent_key , received_key)
         # print('received_key ' , received_key)
     global it_reset
     # print('number of reset step:' , it_reset)
-    print('total bit error ' , error , 'total bit:' , runtimes * key_len )
+    # print('total bit error ' , error , 'total bit:' , runtimes * key_len )
     return 0
 
 
