@@ -33,25 +33,7 @@ class TP_ReceiverAdjust(QuantumProgram):
             
         if self.adjBase[1]==1:
             self.apply(INSTR_X, 0)
-
-        # if self.bellState == 1:
-        #     if self.adjBase[0]==1:
-        #         self.apply(INSTR_Z, 0)  
-            
-        #     if self.adjBase[1]==1:
-        #         self.apply(INSTR_X, 0)
-
-        # elif self.bellState == 3:
-        #     if self.adjBase[0]==1:
-        #         self.apply(INSTR_Z, 0)  
-            
-        #     if self.adjBase[1]==0:
-        #         self.apply(INSTR_X, 0)
-
-        # else:
-        #     print("R undefined case in TP_ReceiverAdjust")
-        
-        # self.apply(INSTR_H , 0)                
+               
         
         yield self.run(parallel=False)
 
@@ -70,32 +52,7 @@ class TP_ReceiverReset(QuantumProgram):
             self.apply(INSTR_X, 0)
 
         if self.adjBase[0]==1:
-            self.apply(INSTR_Z, 0)  
-            
-
-
-        # if self.bellState == 1:
-
-        #     if self.adjBase[1]==1:
-        #         self.apply(INSTR_X, 0)
-        #     if self.adjBase[0]==1:
-        #         self.apply(INSTR_Z, 0)  
-            
-
-
-        # elif self.bellState == 3:
-        #     if self.adjBase[1]==0:
-        #         self.apply(INSTR_X, 0)
-
-        #     if self.adjBase[0]==1:
-        #         self.apply(INSTR_Z, 0)  
-            
-
-
-        # else:
-        #     print("R undefined case in TP_ReceiverAdjust")
-        
-        # self.apply(INSTR_H , 0)                
+            self.apply(INSTR_Z, 0)               
         
         yield self.run(parallel=False)
         
@@ -116,7 +73,6 @@ class QuantumTeleportationReceiver(NodeProtocol):
         self.portNameQR1=portNames[1]
 
         self.receivedQubit=None
-        # self.processor.put(self.resultQubit)
         self.delay=delay
 
         set_qstate_formalism(QFormalism.DM)
@@ -130,16 +86,6 @@ class QuantumTeleportationReceiver(NodeProtocol):
         yield self.await_port_input(port)
         received_qubit = port.rx_input().items
 
-        # fid = fidelity(
-        #     received_qubit, ns.h0, squared=True)
-        # print('fidelity of received qbit' , fid)
-
-        # F = 1
-        # a = np.square(np.sqrt(0.5) * F + np.sqrt(0.5* np.square(F) - 0.5 + 1 - np.square(F)))
-        # print("val of a in receiver side " ,a)
-        # b = 1 - a
-        # received_qubit = AssignStatesBydm([received_qubit] , [np.array([[a,1],[1,b]])])[0]
-
         self.processor.put(received_qubit)
 
         self.prevRes = []
@@ -148,7 +94,6 @@ class QuantumTeleportationReceiver(NodeProtocol):
         self.prevBeta = 1
 
         for i in range(key_len):
-            # print('waiting ' , self.node.name)
         
             port=self.node.ports[self.portNameCR1]
             yield self.await_port_input(port)
@@ -162,68 +107,33 @@ class QuantumTeleportationReceiver(NodeProtocol):
                 yield self.await_port_input(port)
                 res=port.rx_input().items
 
-            # print("R get results:", i , res)
             self.receivedQubit=self.processor.peek(0)[0]
 
-            # print('-----------receiver qbit after R get results------------' , i)
-            # MeasureByProb(self.receivedQubit , do_print=True)
-            # print('------------------------------------')
 
-            # wait for delay ns
             if self.delay>0:
                 yield self.await_timer(duration=self.delay)
 
 
-            # edit EPR2 according to res
             myTP_ReceiverAdjust=TP_ReceiverAdjust(self.bellState,res)
             self.processor.execute_program(myTP_ReceiverAdjust,qubit_mapping=[0])
-            #self.processor.set_program_done_callback(self.show_state,once=True) # see qstate
             self.processor.set_program_fail_callback(ProgramFail,info=self.processor.name,once=True)
             yield self.await_program(processor=self.processor)
 
             self.receivedQubit=self.processor.peek(0)[0]
 
-            # print(measure(self.receivedQubit))
-            # print(MeasureByProb(self.receivedQubit))
-            # print('-----------received qbit------------' , i)
+
             key.append(MeasureByProb(self.receivedQubit , do_print=False))
-            # # key.append(self.extractRes(self.receivedQubit , res))
-            # print('------------------------------------')
-
-
-            # myTP_ReceiverReset=TP_ReceiverReset(self.bellState,res)
-            # self.processor.execute_program(myTP_ReceiverReset,qubit_mapping=[0])
-            # #self.processor.set_program_done_callback(self.show_state,once=True) # see qstate
-            # self.processor.set_program_fail_callback(ProgramFail,info=self.processor.name,once=True)
-            # yield self.await_program(processor=self.processor)
-
-            # fid = fidelity(
-            # self.receivedQubit, ns.qubits.outerprod((ns.S*ns.H*ns.s0).arr), squared=True)
-            # ns.qubits.delay_depolarize(self.receivedQubit, depolar_rate=1e9, delay=2000)
-            # fid = fidelity(
-            # self.receivedQubit, np.array([[.4,1],[1,.6]]), squared=True)
 
             self.prevRes = res
 
 
-
-            # print('fidelity of received qbit' , fid)
-            # print('probs: ' , MeasureProb(self.receivedQubit))
-            # print('reduced dm ' , reduced_dm(self.receivedQubit))
-
-        # print('received' , self.node.name  , key)
         self.key = key
         print('received ' , key)
 
 
-    def show_state(self):
-        set_qstate_formalism(QFormalism.DM)
-        tmp=self.processor.pop(0)[0]
-        # print("R final state:",tmp.qstate.dm)
+
     
     def extractRes(self , qubit , res):
-        # print('#########')
-        # print('#######', self.prevAlpha , self.prevBeta)
         
         prob_0 , prob_1 = MeasureProb(qubit)
         alpha = prob_0 
