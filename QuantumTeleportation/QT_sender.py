@@ -369,7 +369,7 @@ class QuantumTeleportationSender(NodeProtocol):
 
         a , b = a/(a +b) , b/(a+b)
 
-        print('for alpha:' , alpha , a , 'for beta:',beta,b)
+        # print('for alpha:' , alpha , a , 'for beta:',beta,b)
         qubit=create_qubits(1)
         # assign_qstate(qubit, np.diag([0.6, 0.5]))
         # print('assigned qstate ' , qubit[0].qstate.qrepr)
